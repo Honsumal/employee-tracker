@@ -1,6 +1,10 @@
 const mysql = require('mysql2');
 const inquirer = require('inquirer')
-const table = require('console.table')
+const table = require('console.table');
+const e = require('express');
+
+let roles;
+let depts;
 
 const db = mysql.createConnection(
     {
@@ -30,11 +34,24 @@ function view (str) {
     db.query (query, (err, results) => {
         console.table(results)
     })
+
+    //start()
 }
 
 view('e')
 
-const questions = [
+function addDept(name) {
+    db.query(`INSERT INTO department (name) VALUES (?)`, name, (err, results) => {
+        if (err) throw err;
+        else {
+            console.log(`Added Department: ${name} with id: ${results.insertId}`)
+        }
+    })
+
+    //start
+}
+
+const startQuestions = [
     {
         type: 'list',
         name: 'action',
@@ -65,16 +82,44 @@ const questions = [
         }
     },
     {
+        type: 'input',
+        name: 'roleName',
+        message: 'What is the name of the role? ',
+        when: (input) => input.action === 'Add a Role',
+        validate: (roleName) => {
+            if (roleName){
+                return true
+            } else {
+                console.log(' Please enter the name of the role.')
+                return false
+            }
+        }
+    },
+    {
+        type: 'input',
+        name: 'salary',
+        message: 'What is the salary for this role? ',
+        when: (input) => input.action === 'Add a Role',
+        validate: (salary) => {
+            if (!Number.isNaN(parseInt(salary)) && (Math.sign(parseInt(salary)) === 1)){
+                return true
+            } else {
+                console.log(' Please enter a valid salary.')
+                return false
+            }
+        }
+    },
+    {   
         type: 'list',
         name: 'roleDept',
         message: 'What department does this role fall under? ',
         when: (input) => input.action === 'Add a Role',
-        //choices: roles
+        choices: depts
     }
 ]
 
 function start () {
-    inquirer.prompt(questions). then((answers) => {
+    inquirer.prompt(startQuestions). then((answers) => {
         switch (answers.action) {
             case 'View All Departments': 
                 view('d');
@@ -86,13 +131,13 @@ function start () {
                 view('e');
             break;
             case 'Add a Department':
-                create('department');
+                addDept(answers.deptName);
             break;
             case 'Add a Role':
-                create('role');
+                addRole();
             break;
             case 'Add an Employee':
-                create('employee');
+                addEmp();
             break;
             case 'Update an Employee':
                 update();
