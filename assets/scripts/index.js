@@ -1,7 +1,7 @@
 const mysql = require('mysql2');
 const inquirer = require('inquirer')
 const table = require('console.table');
-const e = require('express');
+
 
 let roles;
 let depts;
@@ -38,8 +38,6 @@ function view (str) {
     //start()
 }
 
-view('e')
-
 function addDept(name) {
     db.query(`INSERT INTO department (name) VALUES (?)`, name, (err, results) => {
         if (err) throw err;
@@ -50,6 +48,209 @@ function addDept(name) {
 
     //start
 }
+
+function addRole() {
+    db.query(`SELECT * FROM department`, (err, results) => {
+        if (err) throw err;
+        else {
+            depts = results
+
+            const roleQuestions = [{
+                type: 'input',
+                name: 'name',
+                message: 'What is the name of the role? ',
+                validate: (roleName) => {
+                    if (roleName){
+                        return true
+                    } else {
+                        console.log(' Please enter the name of the role.')
+                        return false
+                    }
+                }
+            },
+            {
+                type: 'input',
+                name: 'salary',
+                message: 'What is the salary for this role? ',
+                validate: (salary) => {
+                    if (!Number.isNaN(parseInt(salary)) && (Math.sign(parseInt(salary)) === 1)){
+                        return true
+                    } else {
+                        console.log(' Please enter a valid salary.')
+                        return false
+                    }
+                }
+            },
+            {   
+                type: 'list',
+                name: 'dept',
+                message: 'What department does this role fall under? ',
+                choices: depts
+            }]
+
+            let query =  `INSERT INTO role (title, salary, department_id) VALUES (?)`
+           
+            inquirer.prompt(roleQuestions).then((answers) => {
+                let dID;                
+                for (let i = 0; i < depts.length; i++) {
+                    if (answers.dept === depts[i].name){
+                    dID = depts[i].id
+                    console.log(dID)
+                }}
+                
+                db.query(query, [[answers.name,answers.salary, dID]], (err, results) => {
+                    if (err) throw err;
+                    else {
+                        console.log (`Added Role: ${answers.name} with id ${results.insertId}`)
+                    }
+                })
+
+                //start()
+             })
+        }
+    })   
+}
+
+function addEmp() { // need to test adding manager
+    db.query (`SELECT id, title FROM role`, (err, results) => {
+        if (err) throw err;
+        else{
+            roles = results.map((obj) => obj.title)
+
+            db.query('SELECT id, CONCAT(first_name, " ", last_name) AS manager_name FROM employee WHERE manager_id IS NULL', (err, response) => {
+                if (err) throw err;
+                else {
+                    managers = response.map((obj) => obj.manager_name)
+
+                    managers.push("This Employee is a Manager")
+                    const empQuestions = [
+                {
+                type: 'input',
+                name: 'first',
+                message: 'What is the first name of this employee? ',
+                validate: (fName) => {
+                    if (fName){
+                        return true
+                    } else {
+                        console.log(' Please enter this employee\'s first name.')
+                        return false
+                    }
+                }
+                },
+                {
+                    type: 'input',
+                    name: 'last',
+                    message: 'What is the last name of this employee? ',
+                    validate: (lName) => {
+                        if (lName){
+                            return true
+                        } else {
+                            console.log(' Please enter this employee\'s last name.')
+                            return false
+                        }
+                    }
+                },
+                {
+                    type: 'list',
+                    name: 'manager',
+                    message: 'Who is this employee\'s manager? ',
+                    choices: managers
+                    
+                },
+                {   
+                    type: 'list',
+                    name: 'role',
+                    message: 'What role does this employee hold ',
+                    choices: roles
+                }
+                    ]
+                
+                    let query = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?)`
+
+                    inquirer.prompt(empQuestions).then((answers) => {
+                        let rID;
+                        let mID;
+
+                        for (let i = 0; i < results.length; i++) {
+                            if (answers.role === results[i].title){
+                            rID = results[i].id
+                        }}
+
+                        for (let j = 0; j < response.length; j++) {
+                            if (answers.manager === response[j].manager_name){
+                            mID = response[j].id
+                        }}
+
+                        db.query(query, [[answers.first, answers.last, rID, mID]], (err, results) => {
+                            if (err) throw err;
+                            else {
+                                console.log (`Added Employee: ${answers.first} ${answers.last} with id ${results.insertId}`)
+                            }
+                        });
+
+                        //start()
+                    });
+                }
+            }
+        )}
+    })
+}
+
+function update() {
+    db.query(`SELECT id, CONCAT(first_name, " ", last_name) AS employee_name FROM employee`, (err, res) => {
+        if (err) throw err;
+        else {
+            employee = res.map((obj) => obj.employee_name)
+
+            db.query(`SELECT id, title FROM role`, (err, results) => {
+                if (err) throw err;
+                else {
+                    roles = results.map((obj) => obj.title)
+
+                    inquirer.prompt([
+                        {
+                            type: "list",
+                            message: "Which employee do you want to update? ",
+                            name: "employee",
+                            choices: employee
+                        },
+                        {
+                            type: 'list',
+                            message: 'What role does this employee now hold? ',
+                            name: 'role',
+                            choices: roles
+                        }
+                    ]).then((answers) => {
+                        let eID;
+                        let rID;
+                        for (let i = 0; i < res.length; i++) {
+                            if (answers.employee === res[i].employee_name){
+                                eID = res[i].id
+                                console.log(eID)
+                        }}
+
+                        for (let j = 0; j < results.length; j++) {
+                            if (answers.role === results[j].title){
+                                rID = results[j].id
+                                console.log(rID)
+                            }
+                        }
+
+                        db.query(`UPDATE employee SET role_id = ${rID} WHERE id = ${eID}`, (err, response) => {
+                            if (err) throw err;
+                            else{
+                                console.log (`Updated Employee: ${answers.employee} to new role: ${answers.role}`)
+                            }
+                        })
+                        view('e')
+                    })
+                }
+            })            
+        }
+    })
+}
+
+view('e')
 
 const startQuestions = [
     {
@@ -81,41 +282,7 @@ const startQuestions = [
             }
         }
     },
-    {
-        type: 'input',
-        name: 'roleName',
-        message: 'What is the name of the role? ',
-        when: (input) => input.action === 'Add a Role',
-        validate: (roleName) => {
-            if (roleName){
-                return true
-            } else {
-                console.log(' Please enter the name of the role.')
-                return false
-            }
-        }
-    },
-    {
-        type: 'input',
-        name: 'salary',
-        message: 'What is the salary for this role? ',
-        when: (input) => input.action === 'Add a Role',
-        validate: (salary) => {
-            if (!Number.isNaN(parseInt(salary)) && (Math.sign(parseInt(salary)) === 1)){
-                return true
-            } else {
-                console.log(' Please enter a valid salary.')
-                return false
-            }
-        }
-    },
-    {   
-        type: 'list',
-        name: 'roleDept',
-        message: 'What department does this role fall under? ',
-        when: (input) => input.action === 'Add a Role',
-        choices: depts
-    }
+    
 ]
 
 function start () {
