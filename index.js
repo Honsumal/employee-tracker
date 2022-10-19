@@ -115,7 +115,6 @@ function addRole() {
                 for (let i = 0; i < depts.length; i++) {
                     if (answers.dept === depts[i].name){
                     dID = depts[i].id
-                    console.log(dID)
                 }}
                 
                 db.query(query, [[answers.name,answers.salary, dID]], (err, results) => {
@@ -361,6 +360,48 @@ function delDept() {
     })
 }
 
+function delRole() {
+    db.query(`SELECT id, title FROM role`, (err, res) => {
+        if (err) throw err;
+        else{
+            let roles = res.map((obj) => obj.title)
+            roles.push('None')
+
+            inquirer.prompt([
+                {
+                    type: 'list',
+                    message: 'Which role do you want to delete? ',
+                    name: 'role',
+                    choices: roles
+                }
+            ]).then((answers) => {
+                if (answers.role === 'None') {
+                    console.log('Deletion Cancelled, returning to main menu')
+                    start()
+                }
+                else {
+                    let rID;                
+                    for (let i = 0; i < res.length; i++) {
+                        if (answers.role === res[i].title){
+                            rID = res[i].id
+                }}
+
+                    db.query(`DELETE FROM role WHERE id = (?);`, rID, (err, result) => {
+                        if (err) throw err;
+                        else {
+                            console.log (`Successfully deleted role: ${answers.role}`)
+                            start()
+                    }
+                    })
+                    
+                }
+            })
+        }
+    })
+}
+
+delRole()
+
 const startQuestions = [
     {
         type: 'list',
@@ -449,4 +490,4 @@ function start () {
     })
 }
 
-start()
+//start()
