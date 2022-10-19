@@ -283,7 +283,7 @@ function updateManager() {
                 else {
                     let managers = response.map((obj) => obj.manager_name)
 
-                    managers.push("This got promoted to manager")
+                    managers.push("This employee got promoted to manager")
 
                     inquirer.prompt([
                         {
@@ -309,6 +309,8 @@ function updateManager() {
                         for (let j = 0; j < response.length; j++) {
                             if (answers.manager === response[j].manager_name){
                                 mID = response[j].id
+                            } else if (answers.manager === 'This employee got promoted to manager') {
+                                mID = null
                             }
                         }
 
@@ -503,7 +505,7 @@ const startQuestions = [
 function start () {
     console.log(`-------------------------------------------------------
     
-              Welcome to The Employee Tracker               
+            Welcome to The Employee Tracker               
 
 -------------------------------------------------------`)
     inquirer.prompt(startQuestions). then((answers) => {
