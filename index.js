@@ -400,7 +400,45 @@ function delRole() {
     })
 }
 
-delRole()
+function delEmployee() {
+    db.query(`SELECT id, CONCAT(first_name, " ", last_name) AS full_name FROM employee`, (err, res) => {
+        if (err) throw err;
+        else{
+            let employees = res.map((obj) => obj.full_name)
+            employees.push('None')
+
+            inquirer.prompt([
+                {
+                    type: 'list',
+                    message: 'Which employee do you want to delete? ',
+                    name: 'employee',
+                    choices: employees
+                }
+            ]).then((answers) => {
+                if (answers.employee === 'None') {
+                    console.log('Deletion Cancelled, returning to main menu')
+                    start()
+                }
+                else {
+                    let eID;                
+                    for (let i = 0; i < res.length; i++) {
+                        if (answers.employee === res[i].full_name){
+                            eID = res[i].id
+                }}
+
+                    db.query(`DELETE FROM employee WHERE id = (?);`, eID, (err, result) => {
+                        if (err) throw err;
+                        else {
+                            console.log (`Successfully deleted employee: ${answers.employee}`)
+                            start()
+                    }
+                    })
+                    
+                }
+            })
+        }
+    })
+}
 
 const startQuestions = [
     {
@@ -490,4 +528,4 @@ function start () {
     })
 }
 
-//start()
+start()
