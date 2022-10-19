@@ -2,10 +2,6 @@ const mysql = require('mysql2');
 const inquirer = require('inquirer')
 const table = require('console.table');
 
-
-let roles;
-let depts;
-
 const db = mysql.createConnection(
     {
         host: 'localhost',
@@ -111,7 +107,7 @@ function addRole() {
     })   
 }
 
-function addEmp() { // need to test adding manager
+function addEmp() { 
     db.query (`SELECT id, title FROM role`, (err, results) => {
         if (err) throw err;
         else{
@@ -196,7 +192,7 @@ function addEmp() { // need to test adding manager
     })
 }
 
-function update() {
+function updateRole() {
     db.query(`SELECT id, CONCAT(first_name, " ", last_name) AS employee_name FROM employee`, (err, res) => {
         if (err) throw err;
         else {
@@ -226,13 +222,11 @@ function update() {
                         for (let i = 0; i < res.length; i++) {
                             if (answers.employee === res[i].employee_name){
                                 eID = res[i].id
-                                console.log(eID)
                         }}
 
                         for (let j = 0; j < results.length; j++) {
                             if (answers.role === results[j].title){
                                 rID = results[j].id
-                                console.log(rID)
                             }
                         }
 
@@ -242,7 +236,7 @@ function update() {
                                 console.log (`Updated Employee: ${answers.employee} to new role: ${answers.role}`)
                             }
                         })
-                        view('e')
+                       //start()
                     })
                 }
             })            
@@ -250,7 +244,61 @@ function update() {
     })
 }
 
-view('e')
+function updateManager() {
+    db.query(`SELECT id, CONCAT(first_name, " ", last_name) AS employee_name FROM employee`, (err, res) => {
+        if (err) throw err;
+        else {
+            let employee = res.map((obj) => obj.employee_name)
+
+            db.query('SELECT id, CONCAT(first_name, " ", last_name) AS manager_name FROM employee WHERE manager_id IS NULL', (err, response) => {
+                if (err) throw err;
+                else {
+                    let managers = response.map((obj) => obj.manager_name)
+
+                    managers.push("This got promoted to manager")
+
+                    inquirer.prompt([
+                        {
+                            type: "list",
+                            message: "Which employee do you want to update? ",
+                            name: "employee",
+                            choices: employee
+                        },
+                        {
+                            type: 'list',
+                            message: 'Who is this employee\'s new manager? ',
+                            name: 'manager',
+                            choices: managers
+                        }
+                    ]).then((answers) => {
+                        let eID;
+                        let mID;
+                        for (let i = 0; i < res.length; i++) {
+                            if (answers.employee === res[i].employee_name){
+                                eID = res[i].id
+                        }}
+
+                        for (let j = 0; j < response.length; j++) {
+                            if (answers.manager === response[j].manager_name){
+                                mID = response[j].id
+                            }
+                        }
+
+                        db.query(`UPDATE employee SET manager_id = ${mID} WHERE id = ${eID}`, (err, response) => {
+                            if (err) throw err;
+                            else{
+                                console.log (`Updated Employee: ${answers.employee} to have a new manager`)
+                            }
+                        })
+                        //start
+                    })
+                }
+            })            
+        }
+    })
+}
+
+updateRole()
 
 const startQuestions = [
     {
@@ -264,7 +312,8 @@ const startQuestions = [
             'Add a Department',
             'Add a Role',
             'Add an Employee',
-            'Update an Employee',
+            'Update an Employee\'s Role',
+            'Update an Employee\'s Manager',
             'Nothing'
         ]
     },
@@ -306,9 +355,12 @@ function start () {
             case 'Add an Employee':
                 addEmp();
             break;
-            case 'Update an Employee':
-                update();
+            case 'Update an Employee\'s Role':
+                updateRole();
             break;
+            case 'Update an Employee\'s Manager':
+                updateManager();
+            break
             case 'Nothing':
                 console.log ('Understood, have a nice day!')
             break;
