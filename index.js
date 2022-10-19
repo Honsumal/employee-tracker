@@ -30,7 +30,7 @@ function view (str) {
     db.query (query, (err, results) => {
         console.table(results)
     })
-
+    
     start()
 }
 
@@ -44,6 +44,8 @@ function viewbyManager () {
         if (err) throw err;
         else{console.table(results)}
     })
+
+    start()
 }
 
 function viewbyDepartment () {
@@ -56,6 +58,8 @@ function viewbyDepartment () {
         if (err) throw err;
         else{console.table(results)}
     })
+
+    start()
 }
 
 function addDept(name) {
@@ -440,6 +444,21 @@ function delEmployee() {
     })
 }
 
+function viewBudgetbyDept () {
+    db.query(
+        `SELECT D.name AS "department", SUM(R.salary) as "total budget"
+        FROM EMPLOYEE AS E
+        LEFT JOIN ROLE AS r ON E.role_id = R.id
+        LEFT JOIN DEPARTMENT AS D ON R.department_id = D.id
+        GROUP BY department`, (err, res) => {
+        if (err) throw err;
+        else {
+            console.table(res)
+        }
+    })
+    start ()
+}
+
 const startQuestions = [
     {
         type: 'list',
@@ -447,6 +466,7 @@ const startQuestions = [
         message: 'What would you like to do? ',
         choices: [
             'View All Departments',
+            'View All Departments by Budget',
             'View All Roles',
             'View All Employees',
             'View All Employees by Manager',
@@ -480,10 +500,19 @@ const startQuestions = [
 ]
 
 function start () {
+    console.log(`-------------------------------------------------------
+    
+    
+              Welcome to The Employee Tracker               
+
+-------------------------------------------------------`)
     inquirer.prompt(startQuestions). then((answers) => {
         switch (answers.action) {
             case 'View All Departments': 
                 view('d');
+            break;
+            case 'View All Departments by Budget': 
+                viewBudgetbyDept();
             break;
             case 'View All Roles':
                 view('r');
