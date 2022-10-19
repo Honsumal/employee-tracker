@@ -31,7 +31,7 @@ function view (str) {
         console.table(results)
     })
 
-    //start()
+    start()
 }
 
 function addDept(name) {
@@ -42,7 +42,7 @@ function addDept(name) {
         }
     })
 
-    //start
+    start()
 }
 
 function addRole() {
@@ -101,7 +101,7 @@ function addRole() {
                     }
                 })
 
-                //start()
+                start()
              })
         }
     })   
@@ -184,7 +184,7 @@ function addEmp() {
                             }
                         });
 
-                        //start()
+                        start()
                     });
                 }
             }
@@ -236,7 +236,7 @@ function updateRole() {
                                 console.log (`Updated Employee: ${answers.employee} to new role: ${answers.role}`)
                             }
                         })
-                       //start()
+                       start()
                     })
                 }
             })            
@@ -290,15 +290,13 @@ function updateManager() {
                                 console.log (`Updated Employee: ${answers.employee} to have a new manager`)
                             }
                         })
-                        //start
+                        start()
                     })
                 }
             })            
         }
     })
 }
-
-updateRole()
 
 const startQuestions = [
     {
@@ -367,3 +365,5 @@ function start () {
         }
     })
 }
+
+start()
