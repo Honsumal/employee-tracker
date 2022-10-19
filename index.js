@@ -58,8 +58,6 @@ function viewbyDepartment () {
     })
 }
 
-viewbyDepartment()
-
 function addDept(name) {
     db.query(`INSERT INTO department (name) VALUES (?)`, name, (err, results) => {
         if (err) throw err;
@@ -324,6 +322,45 @@ function updateManager() {
     })
 }
 
+function delDept() {
+    db.query(`SELECT * FROM department`, (err, res) => {
+        if (err) throw err;
+        else{
+            depts = res.map((obj) => obj.name)
+            depts.push('None')
+
+            inquirer.prompt([
+                {
+                    type: 'list',
+                    message: 'Which department do you want to delete? ',
+                    name: 'dept',
+                    choices: depts
+                }
+            ]).then((answers) => {
+                if (answers.dept === 'None') {
+                    console.log('Deletion Cancelled, returning to main menu')
+                    start()
+                }
+                else {
+                    let dID;                
+                    for (let i = 0; i < res.length; i++) {
+                        if (answers.dept === res[i].name){
+                            dID = res[i].id
+                }}
+
+                    db.query(`DELETE FROM department WHERE id = (?);`, dID, (err, result) => {
+                        if (err) throw err;
+                        else {
+                            console.log (`Successfully deleted department: ${answers.dept}`)
+                        }
+                    })
+                    start()
+                }
+            })
+        }
+    })
+}
+
 const startQuestions = [
     {
         type: 'list',
@@ -340,6 +377,9 @@ const startQuestions = [
             'Add an Employee',
             'Update an Employee\'s Role',
             'Update an Employee\'s Manager',
+            'Delete a Department',
+            'Delete a Role',
+            'Delete an Employee',
             'Nothing'
         ]
     },
@@ -393,6 +433,15 @@ function start () {
             case 'Update an Employee\'s Manager':
                 updateManager();
             break
+            case 'Delete a Department': 
+                delDept();
+            break;
+            case 'Delete a Role':
+                delRole();
+            break;
+            case 'Delete an Employee':
+                delEmployee();
+            break;
             case 'Nothing':
                 console.log ('Understood, have a nice day!')
             break;
@@ -400,4 +449,4 @@ function start () {
     })
 }
 
-//start()
+start()
