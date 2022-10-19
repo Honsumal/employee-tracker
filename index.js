@@ -29,9 +29,10 @@ function view (str) {
 
     db.query (query, (err, results) => {
         console.table(results)
+    
     })
     
-    start()
+    setTimeout(() => {start();}, 1000); 
 }
 
 function viewbyManager () {
@@ -45,7 +46,7 @@ function viewbyManager () {
         else{console.table(results)}
     })
 
-    start()
+    setTimeout(() => {start();}, 1000); 
 }
 
 function viewbyDepartment () {
@@ -59,7 +60,7 @@ function viewbyDepartment () {
         else{console.table(results)}
     })
 
-    start()
+    setTimeout(() => {start();}, 1000); 
 }
 
 function addDept(name) {
@@ -70,7 +71,7 @@ function addDept(name) {
         }
     })
 
-    start()
+    setTimeout(() => {start();}, 1000); 
 }
 
 function addRole() {
@@ -128,7 +129,7 @@ function addRole() {
                     }
                 })
 
-                start()
+                setTimeout(() => {start();}, 1000); 
              })
         }
     })   
@@ -211,7 +212,7 @@ function addEmp() {
                             }
                         });
 
-                        start()
+                        setTimeout(() => {start();}, 1000); 
                     });
                 }
             }
@@ -263,7 +264,7 @@ function updateRole() {
                                 console.log (`Updated Employee: ${answers.employee} to new role: ${answers.role}`)
                             }
                         })
-                       start()
+                       setTimeout(() => {start();}, 1000); 
                     })
                 }
             })            
@@ -317,7 +318,7 @@ function updateManager() {
                                 console.log (`Updated Employee: ${answers.employee} to have a new manager`)
                             }
                         })
-                        start()
+                        setTimeout(() => {start();}, 1000); 
                     })
                 }
             })            
@@ -342,7 +343,7 @@ function delDept() {
             ]).then((answers) => {
                 if (answers.dept === 'None') {
                     console.log('Deletion Cancelled, returning to main menu')
-                    start()
+                    setTimeout(() => {start();}, 1000); 
                 }
                 else {
                     let dID;                
@@ -357,7 +358,7 @@ function delDept() {
                             console.log (`Successfully deleted department: ${answers.dept}`)
                         }
                     })
-                    start()
+                    setTimeout(() => {start();}, 1000); 
                 }
             })
         }
@@ -381,7 +382,7 @@ function delRole() {
             ]).then((answers) => {
                 if (answers.role === 'None') {
                     console.log('Deletion Cancelled, returning to main menu')
-                    start()
+                    setTimeout(() => {start();}, 1000); 
                 }
                 else {
                     let rID;                
@@ -394,7 +395,7 @@ function delRole() {
                         if (err) throw err;
                         else {
                             console.log (`Successfully deleted role: ${answers.role}`)
-                            start()
+                            setTimeout(() => {start();}, 1000); 
                     }
                     })
                     
@@ -421,7 +422,7 @@ function delEmployee() {
             ]).then((answers) => {
                 if (answers.employee === 'None') {
                     console.log('Deletion Cancelled, returning to main menu')
-                    start()
+                    setTimeout(() => {start();}, 1000); 
                 }
                 else {
                     let eID;                
@@ -434,7 +435,7 @@ function delEmployee() {
                         if (err) throw err;
                         else {
                             console.log (`Successfully deleted employee: ${answers.employee}`)
-                            start()
+                            setTimeout(() => {start();}, 1000); 
                     }
                     })
                     
@@ -456,7 +457,7 @@ function viewBudgetbyDept () {
             console.table(res)
         }
     })
-    start ()
+    setTimeout(() => {start();}, 1000)
 }
 
 const startQuestions = [
@@ -501,7 +502,6 @@ const startQuestions = [
 
 function start () {
     console.log(`-------------------------------------------------------
-    
     
               Welcome to The Employee Tracker               
 
