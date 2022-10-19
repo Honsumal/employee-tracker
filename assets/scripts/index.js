@@ -34,6 +34,32 @@ function view (str) {
     start()
 }
 
+function viewbyManager () {
+    query = `SELECT CONCAT(M.first_name, " ", M.last_name) AS manager, E.id, E.first_name, E.last_name, R.title AS "role", D.name AS "department", R.salary AS "salary" 
+    FROM EMPLOYEE AS E 
+    LEFT JOIN ROLE AS R ON E.role_id = R.id 
+    LEFT JOIN DEPARTMENT AS D ON R.department_id = D.id
+    JOIN EMPLOYEE AS M ON E.manager_id = M.id;`
+    db.query(query, (err, results) => {
+        if (err) throw err;
+        else{console.table(results)}
+    })
+}
+
+function viewbyDepartment () {
+    query = `SELECT D.name AS "department", CONCAT(M.first_name, " ", M.last_name) AS manager, E.id, E.first_name, E.last_name, R.title AS "role", R.salary AS "salary" 
+    FROM EMPLOYEE AS E 
+    LEFT JOIN ROLE AS R ON E.role_id = R.id 
+    JOIN DEPARTMENT AS D ON R.department_id = D.id
+    LEFT JOIN EMPLOYEE AS M ON E.manager_id = M.id;`
+    db.query(query, (err, results) => {
+        if (err) throw err;
+        else{console.table(results)}
+    })
+}
+
+viewbyDepartment()
+
 function addDept(name) {
     db.query(`INSERT INTO department (name) VALUES (?)`, name, (err, results) => {
         if (err) throw err;
@@ -307,6 +333,8 @@ const startQuestions = [
             'View All Departments',
             'View All Roles',
             'View All Employees',
+            'View All Employees by Manager',
+            'View All Employees by Department',
             'Add a Department',
             'Add a Role',
             'Add an Employee',
@@ -344,6 +372,12 @@ function start () {
             case 'View All Employees':
                 view('e');
             break;
+            case 'View All Employees by Manager':
+                viewbyManager();
+            break;
+            case 'View All Employees by Department':
+                viewbyDepartment();
+            break;
             case 'Add a Department':
                 addDept(answers.deptName);
             break;
@@ -366,4 +400,4 @@ function start () {
     })
 }
 
-start()
+//start()
